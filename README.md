@@ -2,7 +2,7 @@
 
 An enterprise-grade, distributed RESTful API designed to manage telehealth medical appointments. This system is engineered using **.NET 9** and serves as a robust implementation of **Clean Architecture** and **CQRS**, heavily decoupling business logic from external frameworks to ensure maximum maintainability, testability, and scalability.
 
-## 🚀 Tech Stack & Frameworks
+## Tech Stack & Frameworks
 
 | Category | Technology / Library | Purpose |
 | :--- | :--- | :--- |
@@ -16,7 +16,7 @@ An enterprise-grade, distributed RESTful API designed to manage telehealth medic
 | **Testing** | xUnit, Moq, FluentAssertions | Unit testing and dependency mocking |
 | **DevOps** | Docker & GitHub Actions | Containerization and automated CI/CD pipeline |
 
-## 🏗️ Architectural Highlights
+## Architectural Highlights
 
 ### 1. Clean Architecture Strictness
 The solution is divided into strictly enforced, dependency-inverted layers. The `Domain` layer sits at the absolute center with **zero external dependencies**. The `Application` layer handles use cases, while the `Infrastructure` and `Api` layers are treated as volatile external details.
@@ -30,7 +30,7 @@ Data integrity is enforced *before* it ever reaches the database or the business
 ### 4. Rich Domain Models
 Domain entities (like `Appointment`) encapsulate their own business rules. Properties utilize `private set;` modifiers, meaning state changes can only occur through dedicated domain methods. This prevents external layers from illegally modifying entity states.
 
-## 📂 Solution Structure
+## Solution Structure
 
 ```text
 TelehealthBooking.sln
@@ -42,7 +42,7 @@ TelehealthBooking.sln
 
 ```
 
-## ⚙️ Getting Started (Local Development)
+## Getting Started (Local Development)
 
 ### Prerequisites
 
@@ -78,7 +78,7 @@ dotnet run --project TelehealthBooking.Api/TelehealthBooking.Api.csproj
 
 Once running, navigate to `https://localhost:<port>/scalar/v1` in your browser to access the interactive OpenAPI documentation and test the endpoints.
 
-## 🧪 Testing
+## Testing
 
 The project includes a comprehensive suite of isolated Unit Tests targeting the Application Layer handlers.
 
@@ -89,7 +89,7 @@ dotnet test
 
 ```
 
-## 🐳 Docker Support
+## Docker Support
 
 To run the API entirely inside an isolated Linux container:
 
@@ -101,7 +101,7 @@ docker run -p 8080:8080 -e ASPNETCORE_ENVIRONMENT=Development telehealth-api
 
 Navigate to `http://localhost:8080/scalar/v1` to access the application.
 
-## 🔄 Continuous Integration (CI)
+## Continuous Integration (CI)
 
 This repository utilizes **GitHub Actions**. Every push or pull request to the `main` branch automatically triggers a workflow that provisions an Ubuntu runner, sets up the .NET 9 SDK, restores dependencies, builds the solution, and executes the xUnit test suite to prevent regressions.
 
