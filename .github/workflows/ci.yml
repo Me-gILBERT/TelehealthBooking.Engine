@@ -1,0 +1,35 @@
+name: .NET 9 Clean Architecture CI
+
+# Trigger this pipeline whenever code is pushed to the main branch
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    name: Build and Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Download your code onto the GitHub server
+    - uses: actions/checkout@v4
+    
+    # 2. Install the exact version of .NET you used
+    - name: Setup .NET 9
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+        
+    # 3. Download the NuGet packages (MediatR, EF Core, etc.)
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    # 4. Compile the application in Release mode
+    - name: Build Solution
+      run: dotnet build --no-restore --configuration Release
+      
+    # 5. Run the xUnit tests we wrote in Module 5
+    - name: Run Tests
+      run: dotnet test --no-build --verbosity normal --configuration Release

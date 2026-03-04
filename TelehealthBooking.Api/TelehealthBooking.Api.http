@@ -1,0 +1,6 @@
+@TelehealthBooking.Api_HostAddress = http://localhost:5279
+
+GET {{TelehealthBooking.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

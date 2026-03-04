@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="TelehealthBooking.Api/TelehealthBooking.Api.csproj" />
+  <Project Path="TelehealthBooking.Application/TelehealthBooking.Application.csproj" />
+  <Project Path="TelehealthBooking.Domain/TelehealthBooking.Domain.csproj" />
+  <Project Path="TelehealthBooking.Infrastructure/TelehealthBooking.Infrastructure.csproj" />
+  <Project Path="TelehealthBooking.Tests/TelehealthBooking.Tests.csproj" />
+</Solution>
