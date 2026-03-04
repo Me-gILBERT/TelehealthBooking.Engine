@@ -42,3 +42,69 @@ TelehealthBooking.sln
 ├── TelehealthBooking.Infrastructure # EF Core DbContext, Repositories, Fluent API Configurations
 ├── TelehealthBooking.Api            # API Controllers, Dependency Injection Setup, Scalar UI
 └── TelehealthBooking.Tests          # xUnit Tests, Moq Repositories, FluentAssertions
+
+```
+
+## ⚙️ Getting Started (Local Development)
+
+### Prerequisites
+
+* [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+* Entity Framework Core CLI (`dotnet tool install --global dotnet-ef`)
+* Docker Desktop (Optional, for containerized running)
+
+### 1. Clone the Repository
+
+```bash
+git clone [https://github.com/yourusername/TelehealthBooking.Engine.git](https://github.com/yourusername/TelehealthBooking.Engine.git)
+cd TelehealthBooking.Engine
+
+```
+
+### 2. Apply Database Migrations
+
+The project is configured to use SQL Server LocalDB out of the box. Generate the schema by running:
+
+```bash
+dotnet ef database update --project TelehealthBooking.Infrastructure/TelehealthBooking.Infrastructure.csproj --startup-project TelehealthBooking.Api/TelehealthBooking.Api.csproj
+
+```
+
+### 3. Run the API
+
+Launch the application locally:
+
+```bash
+dotnet run --project TelehealthBooking.Api/TelehealthBooking.Api.csproj
+
+```
+
+Once running, navigate to `https://localhost:<port>/scalar/v1` in your browser to access the interactive OpenAPI documentation and test the endpoints.
+
+## 🧪 Testing
+
+The project includes a comprehensive suite of isolated Unit Tests targeting the Application Layer handlers.
+
+Run the test suite via the CLI:
+
+```bash
+dotnet test
+
+```
+
+## 🐳 Docker Support
+
+To run the API entirely inside an isolated Linux container:
+
+```bash
+docker build -t telehealth-api .
+docker run -p 8080:8080 -e ASPNETCORE_ENVIRONMENT=Development telehealth-api
+
+```
+
+Navigate to `http://localhost:8080/scalar/v1` to access the application.
+
+## 🔄 Continuous Integration (CI)
+
+This repository utilizes **GitHub Actions**. Every push or pull request to the `main` branch automatically triggers a workflow that provisions an Ubuntu runner, sets up the .NET 9 SDK, restores dependencies, builds the solution, and executes the xUnit test suite to prevent regressions.
+
