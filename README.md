@@ -1,7 +1,4 @@
 # TelehealthBooking.Engine
-[![.NET](https://img.shields.io/badge/.NET-9.0-purple.svg)](https://dotnet.microsoft.com/download)
-[![Architecture](https://img.shields.io/badge/Architecture-Clean%20%2F%20Onion-blue.svg)]()
-[![Build & Test](https://github.com/yourusername/TelehealthBooking.Engine/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/TelehealthBooking.Engine/actions/workflows/ci.yml)
 
 An enterprise-grade, distributed RESTful API designed to manage telehealth medical appointments. This system is engineered using **.NET 9** and serves as a robust implementation of **Clean Architecture** and **CQRS**, heavily decoupling business logic from external frameworks to ensure maximum maintainability, testability, and scalability.
 
