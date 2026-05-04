@@ -1,107 +1,207 @@
 # TelehealthBooking.Engine
 
-An enterprise-grade, distributed RESTful API designed to manage telehealth medical appointments. This system is engineered using **.NET 9** and serves as a robust implementation of **Clean Architecture** and **CQRS**, heavily decoupling business logic from external frameworks to ensure maximum maintainability, testability, and scalability.
+A RESTful appointment booking API built with **.NET 9** and **Clean Architecture**, designed to manage the full lifecycle of healthcare appointments across three roles: Doctor, Patient, and Administrator.
 
-## Tech Stack & Frameworks
+Built as a portfolio project to demonstrate enterprise backend patterns including CQRS, dependency inversion, defensive validation, and automated testing.
 
-| Category | Technology / Library | Purpose |
-| :--- | :--- | :--- |
-| **Core Framework** | .NET 9 (C# 13) | Base runtime and language features |
-| **Architecture** | Clean Architecture & CQRS | Separation of concerns and use-case isolation |
-| **Routing & Logic** | MediatR | Decoupling API controllers from business logic |
-| **Data Integrity** | FluentValidation | Pre-execution defensive data validation |
-| **Persistence** | Entity Framework Core 9 | ORM and Code-First Database Migrations |
-| **Database** | SQL Server (LocalDB) | Relational data storage |
-| **API UI** | Scalar / OpenAPI | Modern, interactive API documentation |
-| **Testing** | xUnit, Moq, FluentAssertions | Unit testing and dependency mocking |
-| **DevOps** | Docker & GitHub Actions | Containerization and automated CI/CD pipeline |
+---
 
-## Architectural Highlights
+## Why This Project Exists
 
-### 1. Clean Architecture Strictness
-The solution is divided into strictly enforced, dependency-inverted layers. The `Domain` layer sits at the absolute center with **zero external dependencies**. The `Application` layer handles use cases, while the `Infrastructure` and `Api` layers are treated as volatile external details.
+Manual appointment scheduling in healthcare creates real operational problems — no centralised availability view, no conflict detection, and no audit trail. This API simulates the backend engine of a digital health platform that solves those problems through structured, role-based data access and enforced business rules.
 
-### 2. Command Query Responsibility Segregation (CQRS)
-Using **MediatR**, read and write operations are strictly segregated. API Controllers act merely as entry points, remaining incredibly thin and delegating all business logic to dedicated Command or Query Handlers.
+---
 
-### 3. The Defensive Pipeline
-Data integrity is enforced *before* it ever reaches the database or the business logic. By implementing **FluentValidation** as a MediatR pipeline behavior, invalid requests (e.g., attempting to book an appointment in the past) are intercepted at the application boundary and rejected with a `400 Bad Request`.
+## Tech Stack
 
-### 4. Rich Domain Models
-Domain entities (like `Appointment`) encapsulate their own business rules. Properties utilize `private set;` modifiers, meaning state changes can only occur through dedicated domain methods. This prevents external layers from illegally modifying entity states.
+| Layer | Technology |
+|---|---|
+| Framework | ASP.NET Core (.NET 9), C# 13 |
+| Architecture | Clean Architecture (Domain → Application → Infrastructure → API) |
+| CQRS | MediatR |
+| Validation | FluentValidation |
+| ORM | Entity Framework Core 9 (Code-First) |
+| Database | SQL Server (LocalDB) |
+| API Docs | Scalar / OpenAPI |
+| Testing | xUnit, Moq, FluentAssertions |
+| DevOps | Docker (multi-stage build), GitHub Actions CI |
 
-## Solution Structure
+---
 
-```text
-TelehealthBooking.sln
-├── TelehealthBooking.Domain         # Core entities, Enums, and custom Domain Exceptions
-├── TelehealthBooking.Application    # MediatR Commands/Queries, Interfaces, Validation Rules
-├── TelehealthBooking.Infrastructure # EF Core DbContext, Repositories, Fluent API Configurations
-├── TelehealthBooking.Api            # API Controllers, Dependency Injection Setup, Scalar UI
-└── TelehealthBooking.Tests          # xUnit Tests, Moq Repositories, FluentAssertions
+## Architecture
+
+The solution is divided into four strictly enforced layers. Each layer only knows about the layer directly below it — never above.
 
 ```
+TelehealthBooking.sln
+├── TelehealthBooking.Domain          # Entities, business rules, no external dependencies
+├── TelehealthBooking.Application     # CQRS handlers, interfaces, validation pipeline
+├── TelehealthBooking.Infrastructure  # EF Core DbContext, repositories, Fluent API configs
+├── TelehealthBooking.Api             # Controllers, DI wiring, Scalar UI, middleware
+└── TelehealthBooking.Tests           # Unit tests — xUnit, Moq, FluentAssertions
+```
 
-## Getting Started (Local Development)
+**The core rule:** The `Domain` layer has zero external package dependencies. Business logic doesn't know that EF Core or SQL Server exist.
+
+---
+
+## Key Design Decisions
+
+### Clean Architecture — Why?
+Each layer has one job. The Controller doesn't touch the database. The Repository doesn't know about HTTP. If tomorrow the team decides to switch from SQL Server to PostgreSQL, only `Infrastructure` changes — nothing else.
+
+### CQRS with MediatR — Why?
+Read and write operations are separated into Commands (writes) and Queries (reads). The API controllers are kept thin — they receive the HTTP request, send it to MediatR, and return the result. All business logic lives in the handlers, not in the controllers.
+
+### FluentValidation as a Pipeline Behavior — Why?
+Validation runs automatically *before* any handler executes. If a request violates a business rule (e.g., booking an appointment in the past, or sending empty IDs), it is rejected with a `400 Bad Request` without touching the database. This is the "Defensive Layer."
+
+### Repository Pattern + Dependency Inversion — Why?
+The `Application` layer defines *what* it needs via interfaces (e.g., `IAppointmentRepository`). The `Infrastructure` layer provides the actual implementation. This means unit tests can swap in a fake (mocked) repository without needing a real database connection.
+
+### DTO Pattern — Why?
+Domain entities and API responses are intentionally different objects. Sensitive fields like `PasswordHash` exist on the entity but are never exposed in API responses. DTOs control exactly what data crosses the API boundary.
+
+---
+
+## Core Domain: The Appointment Lifecycle
+
+An `Appointment` entity enforces its own state transitions through methods:
+
+```csharp
+appointment.Confirm();   // Status: "Pending" → "Confirmed"
+appointment.Cancel(reason); // Status: any → "Cancelled"
+```
+
+Properties use `private set` — external code cannot directly mutate appointment state. State changes only happen through these controlled methods.
+
+---
+
+## Conflict Detection
+
+The booking handler checks for overlapping appointments before saving:
+
+```
+A doctor cannot have two active appointments within a 30-minute window.
+If overlap is detected → exception thrown → database never touched.
+```
+
+This business rule is enforced in the handler, tested in isolation via mocked repositories.
+
+---
+
+## API Endpoints
+
+### Appointments
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/appointments` | Book a new appointment |
+
+Additional CRUD endpoints (GET, PUT, DELETE) are planned as part of the Query layer expansion.
+
+### Doctors & Patients
+Standard CRUD endpoints for `Doctor` and `Patient` entities following the same pattern.
+
+API documentation is available at `/scalar/v1` when running in Development mode.
+
+---
+
+## Getting Started
 
 ### Prerequisites
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- SQL Server or LocalDB
+- `dotnet tool install --global dotnet-ef`
 
-* [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-* Entity Framework Core CLI (`dotnet tool install --global dotnet-ef`)
-* Docker Desktop (Optional, for containerized running)
-
-### 1. Clone the Repository
+### Setup
 
 ```bash
-git clone [https://github.com/yourusername/TelehealthBooking.Engine.git](https://github.com/yourusername/TelehealthBooking.Engine.git)
+# Clone the repository
+git clone https://github.com/Me-gILBERT/TelehealthBooking.Engine.git
 cd TelehealthBooking.Engine
 
-```
+# Restore dependencies
+dotnet restore
 
-### 2. Apply Database Migrations
+# Apply database migrations
+dotnet ef database update \
+  --project TelehealthBooking.Infrastructure/TelehealthBooking.Infrastructure.csproj \
+  --startup-project TelehealthBooking.Api/TelehealthBooking.Api.csproj
 
-The project is configured to use SQL Server LocalDB out of the box. Generate the schema by running:
-
-```bash
-dotnet ef database update --project TelehealthBooking.Infrastructure/TelehealthBooking.Infrastructure.csproj --startup-project TelehealthBooking.Api/TelehealthBooking.Api.csproj
-
-```
-
-### 3. Run the API
-
-Launch the application locally:
-
-```bash
+# Run the API
 dotnet run --project TelehealthBooking.Api/TelehealthBooking.Api.csproj
-
 ```
 
-Once running, navigate to `https://localhost:<port>/scalar/v1` in your browser to access the interactive OpenAPI documentation and test the endpoints.
+Open `https://localhost:<port>/scalar/v1` to explore the API.
 
-## Testing
-
-The project includes a comprehensive suite of isolated Unit Tests targeting the Application Layer handlers.
-
-Run the test suite via the CLI:
+### Run Tests
 
 ```bash
 dotnet test
-
 ```
 
-## Docker Support
+Tests run entirely in-memory using mocked repositories — no database connection required.
 
-To run the API entirely inside an isolated Linux container:
+---
+
+## Testing Approach
+
+Unit tests follow the **AAA pattern** (Arrange, Act, Assert):
+
+**Happy path** — proves a valid booking request results in exactly one `AddAsync` call to the repository.
+
+**Negative path** — proves that when an overlapping appointment exists, the handler throws an exception and `AddAsync` is *never* called (`Times.Never`).
+
+This means the test suite proves both that the system works correctly *and* that it defends itself against invalid states.
+
+---
+
+## Docker
+
+A multi-stage `Dockerfile` is included. The build stage uses the full .NET 9 SDK; the final image uses only the lightweight runtime.
 
 ```bash
+# Build the image
 docker build -t telehealth-api .
-docker run -p 8080:8080 -e ASPNETCORE_ENVIRONMENT=Development telehealth-api
 
+# Run the container
+docker run -p 8080:8080 -e ASPNETCORE_ENVIRONMENT=Development telehealth-api
 ```
 
-Navigate to `http://localhost:8080/scalar/v1` to access the application.
+---
 
-## Continuous Integration (CI)
+## CI Pipeline
 
-This repository utilizes **GitHub Actions**. Every push or pull request to the `main` branch automatically triggers a workflow that provisions an Ubuntu runner, sets up the .NET 9 SDK, restores dependencies, builds the solution, and executes the xUnit test suite to prevent regressions.
+A GitHub Actions workflow runs on every push to `main`:
 
+1. Provisions an Ubuntu runner
+2. Installs .NET 9
+3. Restores dependencies
+4. Builds the solution in Release mode
+5. Runs the full unit test suite
+
+If any test fails, the pipeline blocks the merge.
+
+---
+
+## Project Status
+
+| Module | Status |
+|---|---|
+| Clean Architecture setup | ✅ Complete |
+| Core domain entities + CQRS | ✅ Complete |
+| FluentValidation defensive layer | ✅ Complete |
+| EF Core + SQL Server persistence | ✅ Complete |
+| REST API + Scalar documentation | ✅ Complete |
+| Unit testing (xUnit + Moq) | ✅ Complete |
+| Docker containerisation | ✅ Complete |
+| GitHub Actions CI | ✅ Complete |
+| JWT Authentication | 🔲 Planned |
+| Query endpoints (GET by filters) | 🔲 Planned |
+
+---
+
+## Author
+
+**Gilbert Nathaniel**
+[LinkedIn](https://www.linkedin.com/in/gilbert-nathaniel-905a711a9) · [GitHub](https://github.com/Me-gILBERT)
