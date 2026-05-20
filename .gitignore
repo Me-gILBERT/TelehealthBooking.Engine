@@ -3,8 +3,10 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
-# dotenv files
+# Local development / showcase files (not for public repo)
 .env
+SHOWCASE.md
+PLAN.md
 
 # User-specific files
 *.rsuser
