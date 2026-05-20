@@ -13,6 +13,13 @@ public sealed class Doctor : BaseEntity<Guid>
 
     private Doctor() { Name = string.Empty; Specialization = string.Empty; }
 
+    public void Update(string name, string specialization)
+    {
+        Name = name;
+        Specialization = specialization;
+        MarkAsUpdated();
+    }
+
     public static Doctor Create(string name, string specialization)
     {
         return new Doctor

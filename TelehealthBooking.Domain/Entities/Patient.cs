@@ -13,6 +13,13 @@ public sealed class Patient : BaseEntity<Guid>
 
     private Patient() { Name = string.Empty; Email = string.Empty; }
 
+    public void Update(string name, string email)
+    {
+        Name = name;
+        Email = email;
+        MarkAsUpdated();
+    }
+
     public static Patient Create(string name, string email)
     {
         return new Patient

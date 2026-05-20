@@ -28,10 +28,10 @@ public class BookAppointmentCommandHandler : IRequestHandler<BookAppointmentComm
 
     public async Task<Guid> Handle(BookAppointmentCommand request, CancellationToken cancellationToken)
     {
-        // Check for overlaps (Business Rule)
         bool isOverlap = await _appointmentRepository.HasOverlappingAppointmentAsync(
             request.DoctorId,
             request.ScheduledTimeUtc,
+            null,
             cancellationToken);
 
         if (isOverlap)

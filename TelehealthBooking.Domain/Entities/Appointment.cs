@@ -39,6 +39,12 @@ public sealed class Appointment : BaseEntity<Guid>
         MarkAsUpdated();
     }
 
+    public void Reschedule(DateTime newScheduledTimeUtc)
+    {
+        ScheduledTimeUtc = newScheduledTimeUtc;
+        MarkAsUpdated();
+    }
+
     public void Confirm()
     {
         Status = "Confirmed";
